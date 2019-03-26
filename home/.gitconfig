@@ -1,0 +1,39 @@
+[user]
+	name = Alyson Franklin
+	email = alyson.pires@bemobi.com.br
+[merge]
+	tool = vimdiff
+[core]
+	editor = vim
+
+[color]
+        status = auto
+        diff = auto
+        branch = auto
+        interactive = auto
+        ui = true
+[push]
+	default = matching
+[http]
+	postBuffer = 157286400
+[help]
+	autocorrect = 1
+
+[color "diff"]
+        meta = red bold
+        frag = magenta bold
+        old = blue bold
+        new = green bold
+
+
+[alias]
+        st = status
+        sw = show
+        co = checkout
+        ci = commit
+        st = status
+        br = branch
+        ck = checkout
+        hist = log --pretty=format:\"%an => %s%d%n Commit => %H %ad%n \" --graph --date=short --all
+        type = cat-file -t
+        dump = cat-file -p
