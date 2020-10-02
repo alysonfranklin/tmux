@@ -56,6 +56,35 @@ if (( $+commands[yaourt] )); then
   fi
 fi
 
+if (( $+commands[yay] )); then
+  alias yaconf='yay -Pg'
+  alias yaupg='yay -Syu'
+  alias yasu='yay -Syu --noconfirm'
+  alias yain='yay -S'
+  alias yains='yay -U'
+  alias yare='yay -R'
+  alias yarem='yay -Rns'
+  alias yarep='yay -Si'
+  alias yareps='yay -Ss'
+  alias yaloc='yay -Qi'
+  alias yalocs='yay -Qs'
+  alias yalst='yay -Qe'
+  alias yaorph='yay -Qtd'
+  alias yainsd='yay -S --asdeps'
+  alias yamir='yay -Syy'
+
+
+  if (( $+commands[abs] && $+commands[aur] )); then
+    alias yaupd='yay -Sy && sudo abs && sudo aur'
+  elif (( $+commands[abs] )); then
+    alias yaupd='yay -Sy && sudo abs'
+  elif (( $+commands[aur] )); then
+    alias yaupd='yay -Sy && sudo aur'
+  else
+    alias yaupd='yay -Sy'
+  fi
+fi
+
 if (( $+commands[pacaur] )); then
   alias paupg='pacaur -Syu'
   alias pasu='pacaur -Syu --noconfirm'
@@ -95,6 +124,10 @@ elif (( $+commands[yaourt] )); then
   function upgrade() {
     yaourt -Syu
   }
+elif (( $+commands[yay] )); then
+  function upgrade() {
+    yay -Syu
+  }
 else
   function upgrade() {
     sudo pacman -Syu
@@ -116,7 +149,7 @@ alias pacmir='sudo pacman -Syy'
 alias paclsorphans='sudo pacman -Qdt'
 alias pacrmorphans='sudo pacman -Rs $(pacman -Qtdq)'
 alias pacfileupg='sudo pacman -Fy'
-alias pacfiles='pacman -Fs'
+alias pacfiles='pacman -F'
 alias pacls='pacman -Ql'
 alias pacown='pacman -Qo'
 
@@ -175,12 +208,12 @@ function pacmansignkeys() {
 if (( $+commands[xdg-open] )); then
   function pacweb() {
     pkg="$1"
-    infos="$(pacman -Si "$pkg")"
+    infos="$(LANG=C pacman -Si "$pkg")"
     if [[ -z "$infos" ]]; then
       return
     fi
-    repo="$(grep '^Repo' <<< "$infos" | grep -oP '[^ ]+$')"
-    arch="$(grep '^Arch' <<< "$infos" | grep -oP '[^ ]+$')"
+    repo="$(grep -m 1 '^Repo' <<< "$infos" | grep -oP '[^ ]+$')"
+    arch="$(grep -m 1 '^Arch' <<< "$infos" | grep -oP '[^ ]+$')"
     xdg-open "https://www.archlinux.org/packages/$repo/$arch/$pkg/" &>/dev/null
   }
 fi

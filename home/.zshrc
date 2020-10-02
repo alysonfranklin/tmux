@@ -1,5 +1,7 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
+autoload -Uz compinit
+compinit
 
 # Path to your oh-my-zsh installation.
   export ZSH=/home/alyson/.oh-my-zsh
@@ -9,15 +11,23 @@
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 #ZSH_THEME="robbyrussell"
 #ZSH_THEME="gnzh"
-ZSH_THEME="agnoster"
+#ZSH_THEME="agnoster"
 #ZSH_THEME="jnrowe"
+ZSH_THEME="powerlevel9k/powerlevel9k"
+POWERLEVEL9K_MODE="nerdfont-complete"
+#POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir rbenv vcs)
+#POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(node_version php_version ram)
+alias vi="nvim"
+#eval "$(_POLICY_SENTRY_COMPLETE=source_zsh policy_sentry)"
 
-plugins=(zsh-autosuggestions)
-plugins=(rbenv)
+# Habilitando broadcast no tmux
+# setw synchronize-panes on
 
 unsetopt nomatch
 
-export EDITOR=vim
+source <(kubectl completion zsh)
+alias k=kubectl
+complete -F __start_kubectl k
 
 # Set list of themes to load
 # Setting this variable when ZSH_THEME=random
@@ -71,8 +81,21 @@ export EDITOR=vim
 plugins=(
   git
   zsh-autosuggestions
+  tmux
   rbenv
   aws
+  ansible
+  zsh-completions
+  zsh-syntax-highlighting
+  z
+  dnf
+  docker
+  helm
+  kubectl
+  kops
+  man
+  microk8s
+  tmux
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -85,11 +108,11 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+ if [[ -n $SSH_CONNECTION ]]; then
+   export EDITOR='nvim'
+ else
+   export EDITOR='vim'
+ fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -106,32 +129,65 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 #
-# Configura minha chave id_rsa para o bitbucket bemobi 
-ssh-bemobi() { eval "$(ssh-agent -s) ; ssh-add ~/.ssh/id_rsa" ; eval ssh-agent ; ssh-add ~/.ssh/id_rsa}
-
-# Atalho para acessar a vmware vSphere
-vmware() { rdesktop-vrdp -g 1920x1024 -u alyson.pires -N 10.5.9.10 & }
+# Configura minha chave company para o GitHub/Bitbucket da empresa
+ssh-company() { eval "$(ssh-agent -s) ; ssh-add ~/.ssh/company" ; eval ssh-agent ; ssh-add ~/.ssh/company}
 
 # Configura minha chave alyson.private para o bitbucket pessoal 
 ssh-alyson() { eval "$(ssh-agent -s) ; ssh-add ~/.ssh/franklin" ; eval ssh-agent ; ssh-add ~/.ssh/franklin }
-#git push origin master --force
 
-# Loga na aws, basta colocar awsgo IP
+# Configura minha chave alyson.private para o bitbucket pessoal 
+ssh-sm() { eval "$(ssh-agent -s) ; ssh-add ~/.ssh/social_miner" ; eval ssh-agent ; ssh-add ~/.ssh/social_miner }
+
+# Atalho para acessar a vmware vSphere
+#vmware() { rdesktop-vrdp -g 1920x1024 -u alyson.pires -N 10.5.9.10 & }
+
+# converte vídeos no formato *.ts para *.mp4
+converts() { for i in *.ts; do avconv -i "$i" -strict experimental "`echo $i | sed -e "s/.ts/.mp4/g"`"; done }
+
+# Loga na aws, basta digitar awsgo IP
 awsgo() { /usr/bin/ssh -i $HOME/.ssh/alyson.pires.pem alysonpires@"$@";}
+alias workoff='deactivate'
+alias k='kubectl'
 
-goaws() { /usr/bin/ssh -i $HOME/.ssh/nginx.pem ubuntu@"$@";}
-#goaws() { /usr/bin/ssh -i $HOME/.ssh/nginx.pem ec2-user@"$@";}
+sm_proxy() { cd /home/alyson/workspace/Company/Bitbucket/Social_Miner/socialminer-helper-bastion ; ./bastion.sh alyson_franklin }
+
+openvpn_login() {openvpn --config "$1"}
+goaws_ubuntu() { /usr/bin/ssh -i $HOME/.ssh/nginx.pem ubuntu@"$@";}
+goaws_centos() { /usr/bin/ssh -i $HOME/.ssh/nginx.pem ec2-user@"$@";}
 
 awspull() { scp -i $HOME/.ssh/alyson.pires.pem -vr alysonpires@"$@":"$1" }
 
 # Loga em maquinas da alog, basta colocar alog final do IP, ex alog 177
 alog() { /usr/bin/ssh alyson.pires@10.5.9."$@";}
 
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# colored GCC warnings and errors
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
 #loga na sua maquina na bemobi (:
-bemobi() { /usr/bin/ssh alyson@10.0.0.36;}
+#bemobi() { /usr/bin/ssh alyson@10.0.0.36;}
 
 # Roda um script para configurar sua vpn (Arquivo no final do email)
-vpn() { sudo /bin/sh /home/alyson/vpc/vpc.sh;}
+#vpn() { sudo /bin/sh /home/alyson/vpc/vpc.sh;}
+
+# Monta o s3 bucket como uma partição no sistema
+#s3fs devopscourses -o use_cache=/tmp -o allow_other -o uid=1001 -o mp_umask=002 -o multireq_max=5 /s3_bucket 2>/dev/null
 
 #Configura um tunnel, da sua maquina com uma maquina na bemobi
 #Troque pelo seu usuario
@@ -141,10 +197,19 @@ setproxy() { /usr/bin/ssh -D 8123 -f -C -q -N alyson@10.0.0.36;}
 netlist () { sudo /usr/bin/arp-scan -localnet;}
 jupyter-notebook() { /home/alyson/anaconda3/bin/jupyter-notebook;}
 
+docker-rm_containers_volumes() { docker rm -vf $(docker ps -a -q) }
+docker-images-rm-all() { docker rmi -f $(docker images -a -q) }
+docker-login-ecr() {AWS_REGION=$1 && aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 652781506670.dkr.ecr.$AWS_REGION.amazonaws.com}
+
 #Habilitando a inicialização do Tmux no terminal
-#if [ `which tmux 2> /dev/null` -a -z "$TMUX" ]; then
+# _zsh_tmux_plugin_run
+#TMUX=$(_zsh_tmux_plugin_run)
+
+# if [ `which tmux 2> /dev/null` -a -z "$TMUX" ]; then
 #    tmux -2 attach || tmux -2 new; exit
-#fi
+# fi
+
+#export GITHUB_TOKEN=XXXXXXX
 
 echo -e "\033[01;31m===================================================================="
 echo -e "| \033[01;32mInfrastructure Analyst\033[01;31m        \033[01;32mCREATED  BY:\033[01;31m                       |"
@@ -170,3 +235,5 @@ echo "- Aprenda com todo mundo que o cerca;"
 echo "- Tão importante quanto aprender, é colocar em pratica o que você aprendeu;"
 echo "- Ego é como se fosse remédio: na dose certa ele te salva, na super dosagem ele te mata;"
 echo "- Seja evolução constante;"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
